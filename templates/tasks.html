@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Tasks{% endblock %}
+{% block marquee %}Tasks{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <div class="page-title">Tasks</div>
+    <div class="page-meta">{{ tasks|length }} task{% if tasks|length != 1 %}s{% endif %} shown</div>
+  </div>
+</div>
+
+<!-- CREATE TASK FORM -->
+<div class="panel" style="margin-bottom:20px;">
+  <div class="panel-hdr">
+    <span class="panel-title">Create Task</span>
+  </div>
+  <form method="post" action="{{ url_for('create_task') }}" style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+
+    <!-- Title -->
+    <div style="grid-column:1/-1;">
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Title *</label>
+      <input type="text" name="Title" required placeholder="Task title..."
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+    </div>
+
+    <!-- Description -->
+    <div style="grid-column:1/-1;">
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Description</label>
+      <textarea name="Description" rows="2" placeholder="Optional description..."
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;resize:vertical;"></textarea>
+    </div>
+
+    <!-- Team -->
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Team *</label>
+      <select name="TeamID" id="teamSelect" required onchange="loadMembers(this.value)"
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+        <option value="">Select a team...</option>
+        {% for team in user_teams %}
+        <option value="{{ team['TeamID'] }}">{{ team['TeamName'] }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Assign to member -->
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Assign To (optional)</label>
+      <input type="text" name="AssignedTo" placeholder="Username..."
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+    </div>
+
+    <!-- Due date -->
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Due Date</label>
+      <input type="date" name="DueDate"
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+    </div>
+
+    <!-- Priority -->
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Priority</label>
+      <select name="Priority"
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+        <option value="critical">Critical</option>
+      </select>
+    </div>
+
+    <!-- Status -->
+    <div>
+      <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Status</label>
+      <select name="Status"
+        style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+        <option value="backlog" selected>Backlog</option>
+        <option value="in_progress">In Progress</option>
+        <option value="review">Review</option>
+        <option value="done">Done</option>
+      </select>
+    </div>
+
+    <!-- Submit -->
+    <div style="grid-column:1/-1;">
+      <button type="submit" class="btn btn-primary">+ Create Task</button>
+    </div>
+
+  </form>
+</div>
+
+<!-- STATUS FILTER -->
+<div style="display:flex;gap:0;margin-bottom:16px;border:1px solid #252525;width:fit-content;">
+  {% for label, val in [('All','all'),('Backlog','backlog'),('In Progress','in_progress'),('Review','review'),('Done','done')] %}
+  <a href="{{ url_for('tasks', status=val) }}"
+    style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.12em;
+           padding:7px 14px;border-right:1px solid #252525;transition:all 0.1s;
+           {% if status_filter == val %}background:#181818;color:#efefef;{% else %}color:#555;{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+<!-- TASK LIST -->
+{% if tasks %}
+<div class="panel">
+  <table class="tbl">
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Team</th>
+        <th>Assigned To</th>
+        <th>Priority</th>
+        <th>Status</th>
+        <th>Due Date</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+      <tr>
+        <td style="font-weight:500;">{{ task['Title'] }}</td>
+        <td class="mono dimmed" style="font-size:11px;">{{ task['TeamName'] }}</td>
+        <td>
+          {% if task['AssignedTo'] %}
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div class="avatar sm">{{ task['AssignedTo'][:2] | upper }}</div>
+            <span class="mono dimmed" style="font-size:10px;">{{ task['AssignedTo'] }}</span>
+          </div>
+          {% else %}
+          <span class="mono dimmed" style="font-size:10px;">Unassigned</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if task['Priority'] == 'critical' %}<span class="badge badge-red">Critical</span>
+          {% elif task['Priority'] == 'high' %}<span class="badge badge-amber">High</span>
+          {% elif task['Priority'] == 'medium' %}<span class="badge badge-blue">Medium</span>
+          {% else %}<span class="badge badge-grey">Low</span>{% endif %}
+        </td>
+        <td>
+          {% if task['Status'] == 'done' %}<span class="badge badge-green">Done</span>
+          {% elif task['Status'] == 'in_progress' %}<span class="badge badge-amber">In Progress</span>
+          {% elif task['Status'] == 'review' %}<span class="badge badge-blue">Review</span>
+          {% else %}<span class="badge badge-grey">Backlog</span>{% endif %}
+        </td>
+        <td class="mono small dimmed">{{ task['DueDate'] or '—' }}</td>
+        <td>
+          <a href="{{ url_for('task_detail', task_id=task['TaskID']) }}" class="btn btn-ghost" style="padding:4px 10px;font-size:9px;">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="panel" style="padding:40px;text-align:center;">
+  <div class="mono dimmed" style="font-size:11px;">
+    {% if not user_teams %}No teams yet — join or create a team first.
+    {% else %}No tasks found.{% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

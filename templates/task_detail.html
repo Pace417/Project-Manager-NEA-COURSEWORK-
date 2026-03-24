@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% block title %}{{ task['Title'] }}{% endblock %}
+{% block marquee %}Tasks /// {{ task['Title'] }}{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <div class="page-title">{{ task['Title'] }}</div>
+    <div class="page-meta">{{ task['TeamName'] }} &nbsp;///&nbsp; Created by {{ task['CreatedBy'] }}</div>
+  </div>
+  <div class="hdr-actions">
+    <a href="{{ url_for('tasks') }}" class="btn btn-ghost">← Back to Tasks</a>
+    <!-- Delete (creator or team owner only handled in backend) -->
+    <form method="post" action="{{ url_for('delete_task', task_id=task['TaskID']) }}" style="display:inline;">
+      <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this task?')">Delete</button>
+    </form>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 300px;gap:18px;">
+
+  <!-- EDIT FORM -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Edit Task</span>
+    </div>
+    <form method="post" action="{{ url_for('update_task', task_id=task['TaskID']) }}" style="padding:16px;display:flex;flex-direction:column;gap:12px;">
+
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Title</label>
+        <input type="text" name="Title" value="{{ task['Title'] }}" required
+          style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+      </div>
+
+      <div>
+        <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Description</label>
+        <textarea name="Description" rows="4"
+          style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;resize:vertical;">{{ task['Description'] or '' }}</textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Status</label>
+          <select name="Status"
+            style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+            <option value="backlog"     {% if task['Status'] == 'backlog' %}selected{% endif %}>Backlog</option>
+            <option value="in_progress" {% if task['Status'] == 'in_progress' %}selected{% endif %}>In Progress</option>
+            <option value="review"      {% if task['Status'] == 'review' %}selected{% endif %}>Review</option>
+            <option value="done"        {% if task['Status'] == 'done' %}selected{% endif %}>Done</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Priority</label>
+          <select name="Priority"
+            style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+            <option value="low"      {% if task['Priority'] == 'low' %}selected{% endif %}>Low</option>
+            <option value="medium"   {% if task['Priority'] == 'medium' %}selected{% endif %}>Medium</option>
+            <option value="high"     {% if task['Priority'] == 'high' %}selected{% endif %}>High</option>
+            <option value="critical" {% if task['Priority'] == 'critical' %}selected{% endif %}>Critical</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Due Date</label>
+          <input type="date" name="DueDate" value="{{ task['DueDate'] or '' }}"
+            style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+        </div>
+
+        <div>
+          <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:5px;">Assigned To</label>
+          <select name="AssignedTo"
+            style="width:100%;background:#0d0d0d;border:1px solid #333;color:#efefef;padding:8px 10px;font-family:var(--mono);font-size:11px;outline:none;">
+            <option value="">Unassigned</option>
+            {% for member in team_members %}
+            <option value="{{ member['Username'] }}" {% if task['AssignedTo'] == member['Username'] %}selected{% endif %}>
+              {{ member['Username'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- TASK INFO SIDEBAR -->
+  <div style="display:flex;flex-direction:column;gap:14px;">
+
+    <div class="panel">
+      <div class="panel-hdr"><span class="panel-title">Details</span></div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px;">
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Status</div>
+          {% if task['Status'] == 'done' %}<span class="badge badge-green">Done</span>
+          {% elif task['Status'] == 'in_progress' %}<span class="badge badge-amber">In Progress</span>
+          {% elif task['Status'] == 'review' %}<span class="badge badge-blue">Review</span>
+          {% else %}<span class="badge badge-grey">Backlog</span>{% endif %}
+        </div>
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Priority</div>
+          {% if task['Priority'] == 'critical' %}<span class="badge badge-red">Critical</span>
+          {% elif task['Priority'] == 'high' %}<span class="badge badge-amber">High</span>
+          {% elif task['Priority'] == 'medium' %}<span class="badge badge-blue">Medium</span>
+          {% else %}<span class="badge badge-grey">Low</span>{% endif %}
+        </div>
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Due Date</div>
+          <div class="mono" style="font-size:12px;">{{ task['DueDate'] or 'Not set' }}</div>
+        </div>
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Assigned To</div>
+          {% if task['AssignedTo'] %}
+          <div style="display:flex;align-items:center;gap:7px;">
+            <div class="avatar sm">{{ task['AssignedTo'][:2] | upper }}</div>
+            <span class="mono" style="font-size:11px;">{{ task['AssignedTo'] }}</span>
+          </div>
+          {% else %}
+          <span class="mono dimmed" style="font-size:11px;">Unassigned</span>
+          {% endif %}
+        </div>
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Team</div>
+          <div class="mono" style="font-size:12px;">{{ task['TeamName'] }}</div>
+        </div>
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Created By</div>
+          <div class="mono" style="font-size:12px;">{{ task['CreatedBy'] }}</div>
+        </div>
+
+        <div>
+          <div class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;margin-bottom:3px;">Created At</div>
+          <div class="mono" style="font-size:12px;">{{ task['CreatedAt'] }}</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

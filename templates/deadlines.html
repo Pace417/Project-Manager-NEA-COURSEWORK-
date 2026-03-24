@@ -1,0 +1,350 @@
+{% extends "base.html" %}
+{% block title %}Deadlines{% endblock %}
+{% block marquee %}Deadlines{% endblock %}
+
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <div class="page-title">Deadlines</div>
+    <div class="page-meta" id="viewLabel"></div>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-ghost" onclick="goToday()" style="font-size:10px;">Today</button>
+    <button class="btn btn-ghost" id="btnMonth" onclick="setView('month')">Month</button>
+    <button class="btn btn-ghost" id="btnWeek"  onclick="setView('week')">Week</button>
+    <button class="btn btn-ghost" id="btnList"  onclick="setView('list')">List</button>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div style="display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;">Status:</span>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;background:#444;border-radius:1px;"></div><span class="mono" style="font-size:9px;color:#666;">Backlog</span></div>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;background:#d68910;border-radius:1px;"></div><span class="mono" style="font-size:9px;color:#666;">In Progress</span></div>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;background:#2471a3;border-radius:1px;"></div><span class="mono" style="font-size:9px;color:#666;">Review</span></div>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:9px;background:#4CAF50;border-radius:1px;"></div><span class="mono" style="font-size:9px;color:#666;">Done</span></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span class="mono dimmed" style="font-size:9px;text-transform:uppercase;letter-spacing:0.2em;">Priority:</span>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:3px;background:#555;"></div><span class="mono" style="font-size:9px;color:#666;">Low</span></div>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:3px;background:#2471a3;"></div><span class="mono" style="font-size:9px;color:#666;">Medium</span></div>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:3px;background:#d68910;"></div><span class="mono" style="font-size:9px;color:#666;">High</span></div>
+    <div style="display:flex;align-items:center;gap:4px;"><div style="width:9px;height:3px;background:#c0392b;"></div><span class="mono" style="font-size:9px;color:#666;">Critical</span></div>
+  </div>
+</div>
+
+<!-- NAV BAR -->
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+  <button class="btn btn-ghost" onclick="navPrev()" style="padding:5px 12px;">←</button>
+  <span class="mono" id="navLabel" style="font-size:12px;letter-spacing:0.15em;text-transform:uppercase;min-width:200px;text-align:center;"></span>
+  <button class="btn btn-ghost" onclick="navNext()" style="padding:5px 12px;">→</button>
+</div>
+
+<!-- DAY HEADERS (shared) -->
+<div id="dayHeaders" style="display:grid;gap:2px;margin-bottom:2px;"></div>
+
+<!-- MONTH VIEW -->
+<div id="viewMonth"></div>
+
+<!-- WEEK VIEW -->
+<div id="viewWeek"></div>
+
+<!-- LIST VIEW -->
+<div id="viewList" style="display:none;">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+
+    <!-- MY TASKS -->
+    <div>
+      <div class="panel-hdr" style="margin-bottom:10px;">
+        <span class="panel-title">Assigned to Me</span>
+        <span class="mono dimmed" style="font-size:10px;">{{ my_tasks|length }} task{% if my_tasks|length != 1 %}s{% endif %}</span>
+      </div>
+      {% if my_tasks %}
+      <div class="panel">
+        {% for task in my_tasks %}
+        <a href="{{ url_for('task_detail', task_id=task['TaskID']) }}"
+          style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #1a1a1a;"
+          onmouseover="this.style.background='#161616'" onmouseout="this.style.background=''">
+          <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">
+            <div style="width:10px;height:10px;border-radius:2px;background:{{ status_color(task['Status']) }};"></div>
+            <div style="width:10px;height:3px;background:{{ priority_color(task['Priority']) }};"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ task['Title'] }}</div>
+            <div class="mono dimmed" style="font-size:10px;margin-top:1px;">{{ task['TeamName'] }}</div>
+          </div>
+          <div class="mono" style="font-size:10px;flex-shrink:0;color:{% if task['DueDate'] and task['DueDate'] < today %}var(--red){% else %}#555{% endif %};">
+            {{ task['DueDate'] or '—' }}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="panel" style="padding:24px;text-align:center;">
+        <span class="mono dimmed" style="font-size:11px;">No tasks assigned to you.</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- TEAM TASKS -->
+    <div>
+      <div class="panel-hdr" style="margin-bottom:10px;">
+        <span class="panel-title">Team Tasks</span>
+        <span class="mono dimmed" style="font-size:10px;">{{ team_tasks|length }} task{% if team_tasks|length != 1 %}s{% endif %}</span>
+      </div>
+      {% if team_tasks %}
+      <div class="panel">
+        {% for task in team_tasks %}
+        <a href="{{ url_for('task_detail', task_id=task['TaskID']) }}"
+          style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid #1a1a1a;"
+          onmouseover="this.style.background='#161616'" onmouseout="this.style.background=''">
+          <div style="display:flex;flex-direction:column;gap:3px;flex-shrink:0;">
+            <div style="width:10px;height:10px;border-radius:2px;background:{{ status_color(task['Status']) }};"></div>
+            <div style="width:10px;height:3px;background:{{ priority_color(task['Priority']) }};"></div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ task['Title'] }}</div>
+            <div class="mono dimmed" style="font-size:10px;margin-top:1px;">
+              {{ task['TeamName'] }}{% if task['AssignedTo'] %} · {{ task['AssignedTo'] }}{% endif %}
+            </div>
+          </div>
+          <div class="mono" style="font-size:10px;flex-shrink:0;color:{% if task['DueDate'] and task['DueDate'] < today %}var(--red){% else %}#555{% endif %};">
+            {{ task['DueDate'] or '—' }}
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="panel" style="padding:24px;text-align:center;">
+        <span class="mono dimmed" style="font-size:11px;">No team tasks with due dates.</span>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<!-- ── JAVASCRIPT ──────────────────────────────────────────── -->
+<script>
+const TASKS = {{ tasks_json | safe }};
+const TODAY = "{{ today }}";
+
+const STATUS_COLOR = {
+  backlog:     "#444444",
+  in_progress: "#d68910",
+  review:      "#2471a3",
+  done:        "#4CAF50",
+};
+const PRIORITY_COLOR = {
+  low:      "#555555",
+  medium:   "#2471a3",
+  high:     "#d68910",
+  critical: "#c0392b",
+};
+const DAYS   = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+const MONTHS = ["January","February","March","April","May","June",
+                "July","August","September","October","November","December"];
+
+const now = new Date();
+let curYear  = now.getFullYear();
+let curMonth = now.getMonth();
+let curWeekStart = getWeekStart(now); // Monday of current week
+let currentView = "month";
+
+// ── Helpers ────────────────────────────────────────────────
+function getWeekStart(d) {
+  const day = new Date(d);
+  const dow = day.getDay(); // 0=Sun
+  const diff = (dow === 0 ? -6 : 1 - dow);
+  day.setDate(day.getDate() + diff);
+  day.setHours(0,0,0,0);
+  return day;
+}
+
+function toISO(d) {
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function tasksByDate() {
+  const map = {};
+  TASKS.forEach(t => {
+    if (!t.due) return;
+    if (!map[t.due]) map[t.due] = [];
+    map[t.due].push(t);
+  });
+  return map;
+}
+
+function makeChip(t) {
+  const a = document.createElement("a");
+  a.href = `/tasks/${t.id}`;
+  a.title = `${t.title}\nAssigned: ${t.assigned || "Unassigned"}\nStatus: ${t.status}\nPriority: ${t.priority}`;
+  a.style.cssText = `
+    display:block;
+    background:${STATUS_COLOR[t.status] || "#333"};
+    border-left:3px solid ${PRIORITY_COLOR[t.priority] || "#555"};
+    color:#fff;
+    font-family:'Share Tech Mono',monospace;
+    font-size:9px;
+    padding:2px 5px;
+    margin-bottom:2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    text-decoration:none;
+    opacity:0.92;
+    transition:opacity 0.1s;
+  `;
+  a.onmouseover = () => a.style.opacity = "1";
+  a.onmouseout  = () => a.style.opacity = "0.92";
+  const assignee = t.assigned ? ` · ${t.assigned}` : "";
+  a.textContent = t.title + assignee;
+  return a;
+}
+
+function makeDayCell(dateStr, label, isToday, tall) {
+  const cell = document.createElement("div");
+  cell.style.cssText = `
+    min-height:${tall ? "120px" : "90px"};
+    background:${isToday ? "#161616" : "#0d0d0d"};
+    border:1px solid ${isToday ? "#4CAF50" : "#1c1c1c"};
+    padding:5px;
+    overflow:hidden;
+  `;
+  const num = document.createElement("div");
+  num.style.cssText = `font-family:'Share Tech Mono',monospace;font-size:10px;color:${isToday ? "#4CAF50" : "#444"};margin-bottom:4px;font-weight:${isToday ? "bold" : "normal"};`;
+  num.textContent = label;
+  cell.appendChild(num);
+  return cell;
+}
+
+// ── Day headers ────────────────────────────────────────────
+function renderDayHeaders(cols) {
+  const hdr = document.getElementById("dayHeaders");
+  hdr.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+  hdr.innerHTML = "";
+  DAYS.forEach(d => {
+    const el = document.createElement("div");
+    el.style.cssText = "text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.2em;color:#444;padding:5px 0;";
+    el.textContent = d;
+    hdr.appendChild(el);
+  });
+}
+
+// ── MONTH VIEW ─────────────────────────────────────────────
+function renderMonth() {
+  const tbd = tasksByDate();
+  const grid = document.getElementById("viewMonth");
+  grid.innerHTML = "";
+  grid.style.cssText = "display:grid;grid-template-columns:repeat(7,1fr);gap:2px;";
+
+  document.getElementById("navLabel").textContent = `${MONTHS[curMonth]} ${curYear}`;
+  document.getElementById("viewLabel").textContent = `${MONTHS[curMonth]} ${curYear}`.toUpperCase();
+
+  renderDayHeaders(7);
+
+  const firstDow = new Date(curYear, curMonth, 1).getDay();
+  const offset   = firstDow === 0 ? 6 : firstDow - 1;
+  const daysInMonth = new Date(curYear, curMonth+1, 0).getDate();
+
+  for (let i = 0; i < offset; i++) {
+    const blank = document.createElement("div");
+    blank.style.cssText = "min-height:90px;background:#080808;border:1px solid #141414;";
+    grid.appendChild(blank);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const mm = String(curMonth+1).padStart(2,"0");
+    const dd = String(d).padStart(2,"0");
+    const dateStr = `${curYear}-${mm}-${dd}`;
+    const isToday = dateStr === TODAY;
+    const cell = makeDayCell(dateStr, d, isToday, false);
+    (tbd[dateStr] || []).forEach(t => cell.appendChild(makeChip(t)));
+    grid.appendChild(cell);
+  }
+}
+
+// ── WEEK VIEW ──────────────────────────────────────────────
+function renderWeek() {
+  const tbd = tasksByDate();
+  const grid = document.getElementById("viewWeek");
+  grid.innerHTML = "";
+  grid.style.cssText = "display:grid;grid-template-columns:repeat(7,1fr);gap:2px;";
+
+  const weekEnd = new Date(curWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const label = `${curWeekStart.getDate()} ${MONTHS[curWeekStart.getMonth()]} – ${weekEnd.getDate()} ${MONTHS[weekEnd.getMonth()]} ${weekEnd.getFullYear()}`;
+  document.getElementById("navLabel").textContent = label;
+  document.getElementById("viewLabel").textContent = label.toUpperCase();
+
+  renderDayHeaders(7);
+
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(curWeekStart);
+    day.setDate(day.getDate() + i);
+    const dateStr = toISO(day);
+    const isToday = dateStr === TODAY;
+    const label = `${DAYS[i]} ${day.getDate()}`;
+    const cell = makeDayCell(dateStr, label, isToday, true);
+    (tbd[dateStr] || []).forEach(t => cell.appendChild(makeChip(t)));
+    grid.appendChild(cell);
+  }
+}
+
+// ── Navigation ─────────────────────────────────────────────
+function navPrev() {
+  if (currentView === "month") {
+    curMonth--;
+    if (curMonth < 0) { curMonth = 11; curYear--; }
+    renderMonth();
+  } else if (currentView === "week") {
+    curWeekStart.setDate(curWeekStart.getDate() - 7);
+    renderWeek();
+  }
+}
+
+function navNext() {
+  if (currentView === "month") {
+    curMonth++;
+    if (curMonth > 11) { curMonth = 0; curYear++; }
+    renderMonth();
+  } else if (currentView === "week") {
+    curWeekStart.setDate(curWeekStart.getDate() + 7);
+    renderWeek();
+  }
+}
+
+function goToday() {
+  curMonth = now.getMonth();
+  curYear  = now.getFullYear();
+  curWeekStart = getWeekStart(now);
+  if (currentView === "month") renderMonth();
+  else if (currentView === "week") renderWeek();
+}
+
+// ── View toggle ────────────────────────────────────────────
+function setView(v) {
+  currentView = v;
+  document.getElementById("viewMonth").style.display  = v === "month"    ? "grid"  : "none";
+  document.getElementById("viewWeek").style.display   = v === "week"     ? "grid"  : "none";
+  document.getElementById("viewList").style.display   = v === "list"     ? "block" : "none";
+  document.getElementById("dayHeaders").style.display = v === "list"     ? "none"  : "grid";
+  document.getElementById("navLabel").parentElement.style.display = v === "list" ? "none" : "flex";
+
+  ["btnMonth","btnWeek","btnList"].forEach(id => {
+    document.getElementById(id).className = "btn btn-ghost";
+  });
+  document.getElementById(`btn${v.charAt(0).toUpperCase()+v.slice(1)}`).className = "btn btn-primary";
+
+  if (v === "month") renderMonth();
+  else if (v === "week") renderWeek();
+  else document.getElementById("viewLabel").textContent = "ALL TASKS";
+}
+
+// Init
+setView("month");
+</script>
+{% endblock %}

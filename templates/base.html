@@ -1,0 +1,62 @@
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Infrared – {% block title %}{% endblock %}</title>
+    <link rel="icon" href="{{ url_for('static', filename='infrared.ico') }}" type="image/x-icon">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body class="app-wrap">
+
+  <!-- MARQUEE -->
+  <div class="running-text">
+    <div class="running-text-container">
+      <span class="running-text-content">
+        Infrared | Project Manager | {% block marquee %}{% endblock %}
+      </span>
+    </div>
+  </div>
+
+  <!-- TOP NAV -->
+  <nav class="topnav">
+    <a href="{{ url_for('home') }}" class="nav-logo">INFRA<em>RED</em></a>
+    <div class="nav-tabs">
+      <a href="{{ url_for('home') }}"  class="nav-tab {% if page == 'home' %}active{% endif %}"><span class="dot"></span> Home</a>
+      <a href="{{ url_for('teams') }}"      class="nav-tab {% if page == 'teams' %}active{% endif %}"><span class="dot"></span> Teams</a>
+      <a href="{{ url_for('projects') }}"   class="nav-tab {% if page == 'projects' %}active{% endif %}"><span class="dot"></span> Projects</a>
+      <a href="{{ url_for('tasks') }}"      class="nav-tab {% if page == 'tasks' %}active{% endif %}"><span class="dot"></span> Tasks</a>
+      <a href="{{ url_for('deadlines') }}"  class="nav-tab {% if page == 'deadlines' %}active{% endif %}"><span class="dot"></span> Deadlines</a>
+    </div>
+    <div class="nav-user">
+      <div class="nav-avatar">{{ session['Username'][:2] | upper }}</div>
+      {{ session['Username'] }}
+    </div>
+  </nav>
+
+  <!-- BODY -->
+  <div class="app-body">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sb-section">Workspace</div>
+      <a href="{{ url_for('home') }}"  class="sb-item {% if page == 'home' %}active{% endif %}"><span class="sb-icon">▣</span> home</a>
+      <a href="{{ url_for('tasks') }}"      class="sb-item {% if page == 'tasks' %}active{% endif %}"><span class="sb-icon">◈</span> My Tasks</a>
+      <a href="{{ url_for('projects') }}"   class="sb-item {% if page == 'projects' %}active{% endif %}"><span class="sb-icon">⊞</span> Projects</a>
+      <a href="{{ url_for('deadlines') }}"  class="sb-item {% if page == 'deadlines' %}active{% endif %}"><span class="sb-icon">◎</span> Deadlines</a>
+      <a href="{{ url_for('teams') }}"      class="sb-item {% if page == 'teams' %}active{% endif %}"><span class="sb-icon">◈</span> Team</a>
+      <hr class="sb-divider">
+      <div class="sb-section">Account</div>
+      <a href="#"                           class="sb-item"><span class="sb-icon">⚙</span> Settings</a>
+      <a href="{{ url_for('logout') }}"     class="sb-item"><span class="sb-icon">⇠</span> Log Out</a>
+    </aside>
+
+    <!-- PAGE CONTENT -->
+    <main class="main">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+
+
+</body>
+</html>

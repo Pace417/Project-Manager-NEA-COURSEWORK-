@@ -1,0 +1,231 @@
+/*
+.wrapper,
+.gradient,
+a,
+.list-menu__item,
+button,
+label,
+.header__icon {
+  cursor: url("/crosshair.png"), auto !important;
+}
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+  background: #080808;
+  color: #efefef;
+}
+/*
+body {
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    /*background-image:url("https://www.ariyanhormoz.com/bgb.jpg"); 
+    cursor: url("/crosshair.png"), auto !important;
+  }*/
+  
+  /*
+@font-face {
+  font-family: 'MOM_T';
+  src: url('https://cdn.shopify.com/s/files/1/0905/0560/9535/files/MOM_T.woff2?v=1726965328') format('woff2');
+}
+h1, h2, h3, .running-text-content, .button, button, label, .error-message, .container {
+  font-family: 'MOM_T' !important;
+}*/
+  .container {
+    background-color: #999999;
+    border: 2px solid #000000;
+    padding: 20px;
+    border-radius: 0px;
+    box-shadow: 5 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    width: 300px; /* Adjust width as needed */
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #cccccc;
+    border: 1px solid #000000;
+    border-radius: 0px;
+    box-sizing: border-box; /* Ensures padding is included in width */
+  }
+  
+  button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50; /* Green button */
+    color: white;
+    border: none;
+    border-radius: 0px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #45a049; /* Darker green on hover */
+  }
+  
+  .error-message {
+    color: red;
+    margin-top: 10px;
+    text-align: center; /* Center the error message */
+  }
+
+  h3 {
+    font-size: 25px;
+    color: 999999;
+    margin-bottom: 10px;
+    letter-spacing: 0.4em;
+  }
+/* background image css */
+.bgimg{
+  position: fixed;;
+  top: 0;
+  left: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  z-index: -10;
+  height: 100vh;
+  width: 100vw;  
+  display: block !important;
+  
+  background-image: url("https://www.ariyanhormoz.com/site_bkg_concept.png");
+  
+}
+
+  .bgimg2{
+    position: fixed;;
+    top: 0;
+    left: 0;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
+    z-index: -10;
+    height: 100vh;
+    width: 100vw;  
+    display: block !important;
+    
+    background-image: url("/assets/nuke_ramp_w_textce2f.png");
+    
+  }
+
+/* "running text" css */
+
+#running-text-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 1;
+
+}
+
+.running-text {
+  background: #000;
+  border-bottom: 1px solid #1a1a1a;
+  padding: 9px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.running-text-container {
+  display: inline-block;
+  animation: marquee 28s linear infinite;
+  padding-left: 100%;
+}
+
+.running-text-content {
+  display: inline-block;
+  padding-right: 100%;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  color: #fff;
+}
+span.running-text-content {
+  color: #ffffff !important;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+
+.app-wrap { display: flex; flex-direction: column; min-height: 100vh; }
+.app-body { display: flex; flex: 1; overflow: hidden; }
+.main { flex: 1; overflow-y: auto; padding: 26px 30px; }
+
+.topnav { background: #0d0d0d; border-bottom: 1px solid #252525; display: flex; align-items: stretch; height: 46px; position: sticky; top: 0; z-index: 200; }
+.nav-logo { font-size: 20px; letter-spacing: 0.18em; color: #efefef; padding: 0 22px; display: flex; align-items: center; border-right: 1px solid #252525; background: #000; }
+.nav-logo em { color: #ff0000; font-style: normal; }
+.nav-tabs { display: flex; flex: 1; }
+.nav-tab { font-size: 11px; text-transform: uppercase; color: #555; padding: 0 20px; display: flex; align-items: center; gap: 7px; border-bottom: 2px solid transparent; transition: all 0.12s; }
+.nav-tab:hover { color: #efefef; background: #151515; }
+.nav-tab.active { color: #efefef; border-bottom-color: #ff0000; background: #131313; }
+.nav-tab .dot { width: 5px; height: 5px; border-radius: 50%; background: #333; }
+.nav-tab.active .dot { background: #ff0000; }
+.nav-user { margin-left: auto; display: flex; align-items: center; gap: 10px; padding: 0 18px; border-left: 1px solid #252525; font-size: 10px; color: #555; }
+.nav-avatar { width: 28px; height: 28px; background: #ff0000; border: 1px solid #ff0000; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; color: #fff; }
+
+.sidebar { width: 210px; background: #0d0d0d; border-right: 1px solid #252525; padding: 16px 0; flex-shrink: 0; overflow-y: auto; }
+.sb-section { font-size: 9px; text-transform: uppercase; letter-spacing: 0.35em; color: #3a3a3a; padding: 10px 16px 5px; }
+.sb-item { display: flex; align-items: center; gap: 9px; padding: 9px 16px; font-size: 11px; color: #555; border-left: 2px solid transparent; transition: all 0.1s; }
+.sb-item:hover { color: #efefef; background: #151515; }
+.sb-item.active { color: #efefef; border-left-color: #ff0000; background: #131313; }
+.sb-divider { border: none; border-top: 1px solid #1a1a1a; margin: 10px 0; }
+
+footer { border-top: 1px solid #141414; padding: 11px 28px; display: flex; justify-content: space-between; align-items: center; background: #050505; }
+.ft-text { font-size: 9px; color: #2a2a2a; text-transform: uppercase; letter-spacing: 0.2em; }
+.ft-status { display: flex; align-items: center; gap: 6px; font-size: 9px; color: #ff0000; }
+.pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: #ff0000; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.auth-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 38px);
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+}
+
+.sidebar {
+  align-self: stretch;
+}
+</style>

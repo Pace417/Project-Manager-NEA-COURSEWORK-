@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Teams{% endblock %}
+{% block marquee %}Teams{% endblock %}
+ 
+{% block content %}
+<div class="page-hdr">
+  <div>
+    <div class="page-title">Teams</div>
+    <div class="page-meta">Manage your teams</div>
+  </div>
+  <div class="hdr-actions">
+    <!-- CREATE TEAM FORM -->
+    <form method="post" action="{{ url_for('create_team') }}" style="display:flex;gap:8px;">
+      <input type="text" name="TeamName" placeholder="Team name..." required
+        style="background:#1a1a1a;border:1px solid #333;color:#efefef;padding:7px 12px;
+               font-family:var(--mono);font-size:11px;outline:none;width:180px;">
+      <button type="submit" class="btn btn-primary">+ Create Team</button>
+    </form>
+  </div>
+</div>
+ 
+<!-- TEAMS YOU OWN -->
+{% if owned_teams %}
+<div class="panel-hdr" style="margin-bottom:12px;">
+  <span class="panel-title">Your Teams</span>
+  <span class="mono dimmed" style="font-size:10px;">{{ owned_teams|length }} team{% if owned_teams|length != 1 %}s{% endif %}</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:28px;">
+  {% for team in owned_teams %}
+  <a href="{{ url_for('team_detail', team_id=team['TeamID']) }}" class="panel" style="display:block;padding:18px;transition:background 0.1s;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:14px;font-weight:500;">{{ team['TeamName'] }}</span>
+      <span class="badge badge-green">Owner</span>
+    </div>
+    <div class="mono dimmed" style="font-size:10px;">{{ team['member_count'] }} member{% if team['member_count'] != 1 %}s{% endif %}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+ 
+<!-- TEAMS YOU'RE A MEMBER OF -->
+{% if member_teams %}
+<div class="panel-hdr" style="margin-bottom:12px;">
+  <span class="panel-title">Member Of</span>
+  <span class="mono dimmed" style="font-size:10px;">{{ member_teams|length }} team{% if member_teams|length != 1 %}s{% endif %}</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">
+  {% for team in member_teams %}
+  <a href="{{ url_for('team_detail', team_id=team['TeamID']) }}" class="panel" style="display:block;padding:18px;transition:background 0.1s;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+      <span style="font-size:14px;font-weight:500;">{{ team['TeamName'] }}</span>
+      <span class="badge badge-grey">Member</span>
+    </div>
+    <div class="mono dimmed" style="font-size:10px;">Owned by {{ team['OwnerUsername'] }} &nbsp;·&nbsp; {{ team['member_count'] }} member{% if team['member_count'] != 1 %}s{% endif %}</div>
+  </a>
+  {% endfor %}
+</div>
+{% endif %}
+ 
+{% if not owned_teams and not member_teams %}
+<div class="panel" style="padding:40px;text-align:center;">
+  <div class="mono dimmed" style="font-size:11px;">You're not in any teams yet. Create one above.</div>
+</div>
+{% endif %}
+ 
+{% endblock %}

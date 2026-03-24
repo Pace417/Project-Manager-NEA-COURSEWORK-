@@ -1,0 +1,41 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='infrared.ico') }}" type="image/x-icon">
+</head>
+<body class="auth-body">
+
+<div class="bgimg"></div>
+
+<div id="running-text-wrapper">
+    <section class="running-text" style="background-color: #000000; color: #ffffff">
+        <div class="running-text-container">
+            <span class="running-text-content">Welcome to Infrared – Create an Account</span>
+        </div>
+    </section>
+</div>
+
+<div class="container">
+    <h2>Sign Up</h2>
+
+    <form method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="Username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="Password" required>
+
+        <button type="submit">Sign Up</button>
+
+        {% if error %}
+            <div id="errorMessage" class="error-message">{{ error }}</div>
+        {% endif %}
+    </form>
+
+    <p><a href="{{ url_for('login') }}">Already have an account? Log in</a></p>
+</div>
+
+</body>
+</html>
