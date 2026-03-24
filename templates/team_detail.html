@@ -1,26 +1,25 @@
 {% extends "base.html" %}
-{% block title %}{{ team['TeamName'] }}{% endblock %}
-{% block marquee %}Teams /// {{ team['TeamName'] }}{% endblock %}
+{% block title %}{{ team["TeamName"] }}{% endblock %}
+{% block marquee %}Teams /// {{ team["TeamName"] }}{% endblock %}
  
 {% block content %}
 <div class="page-hdr">
   <div>
-    <div class="page-title">{{ team['TeamName'] }}</div>
+    <div class="page-title">{{ team["TeamName"] }}</div>
     <div class="page-meta">{{ members|length }} member{% if members|length != 1 %}s{% endif %} &nbsp;///&nbsp; {% if is_owner %}Owner{% else %}Member{% endif %}</div>
   </div>
   <div class="hdr-actions">
-    <a href="{{ url_for('teams') }}" class="btn btn-ghost">← Back to Teams</a>
+    <a href="{{ url_for("teams") }}" class="btn btn-ghost">← Back to Teams</a>
   </div>
 </div>
  
-<!-- ERROR -->
 {% if error %}
 <div class="error-message" style="margin-bottom:16px;">{{ error }}</div>
 {% endif %}
  
 <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;">
  
-  <!-- MEMBERS LIST -->
+
   <div class="panel">
     <div class="panel-hdr">
       <span class="panel-title">Members</span>
@@ -39,15 +38,15 @@
         <tr>
           <td>
             <div style="display:flex;align-items:center;gap:10px;">
-              <div class="avatar sm">{{ member['Username'][:2] | upper }}</div>
-              {{ member['Username'] }}
-              {% if member['Username'] == session['Username'] %}
+              <div class="avatar sm">{{ member["Username"][:2] | upper }}</div>
+              {{ member["Username"] }}
+              {% if member["Username"] == session["Username"] %}
               <span class="mono dimmed" style="font-size:10px;">(you)</span>
               {% endif %}
             </div>
           </td>
           <td>
-            {% if member['Role'] == 'owner' %}
+            {% if member["Role"] == "owner" %}
             <span class="badge badge-green">Owner</span>
             {% else %}
             <span class="badge badge-grey">Member</span>
@@ -55,8 +54,8 @@
           </td>
           {% if is_owner %}
           <td>
-            {% if member['Username'] != session['Username'] %}
-            <form method="post" action="{{ url_for('remove_member', team_id=team['TeamID'], username=member['Username']) }}">
+            {% if member["Username"] != session["Username"] %}
+            <form method="post" action="{{ url_for("remove_member", team_id=team["TeamID"], username=member["Username"]) }}">
               <button type="submit" class="btn btn-danger" style="padding:4px 10px;font-size:9px;">Remove</button>
             </form>
             {% endif %}
@@ -68,14 +67,13 @@
     </table>
   </div>
  
-  <!-- ADD MEMBER (owner only) -->
   {% if is_owner %}
   <div class="panel" style="align-self:start;">
     <div class="panel-hdr">
       <span class="panel-title">Add Member</span>
     </div>
     <div style="padding:16px;">
-      <form method="post" action="{{ url_for('add_member', team_id=team['TeamID']) }}">
+      <form method="post" action="{{ url_for("add_member", team_id=team["TeamID"]) }}">
         <label style="font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:0.15em;color:#555;display:block;margin-bottom:6px;">
           Username
         </label>

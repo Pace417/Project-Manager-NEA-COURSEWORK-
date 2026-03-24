@@ -9,7 +9,6 @@
     <div class="page-meta">Manage your teams</div>
   </div>
   <div class="hdr-actions">
-    <!-- CREATE TEAM FORM -->
     <form method="post" action="{{ url_for('create_team') }}" style="display:flex;gap:8px;">
       <input type="text" name="TeamName" placeholder="Team name..." required
         style="background:#1a1a1a;border:1px solid #333;color:#efefef;padding:7px 12px;
@@ -19,7 +18,6 @@
   </div>
 </div>
  
-<!-- TEAMS YOU OWN -->
 {% if owned_teams %}
 <div class="panel-hdr" style="margin-bottom:12px;">
   <span class="panel-title">Your Teams</span>
@@ -38,7 +36,6 @@
 </div>
 {% endif %}
  
-<!-- TEAMS YOU'RE A MEMBER OF -->
 {% if member_teams %}
 <div class="panel-hdr" style="margin-bottom:12px;">
   <span class="panel-title">Member Of</span>

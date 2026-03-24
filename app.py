@@ -474,11 +474,11 @@ def create_team():
                 (team_name, session["Username"]))
     team_id = cur.lastrowid
  
-    # Add owner as a member with role 'owner'
+    # Add owner 
     cur.execute("INSERT INTO TeamMembers (TeamID, Username, Role) VALUES (?, ?, 'owner')",
                 (team_id, session["Username"]))
  
-    con.commit()
+
     con.close()
     return redirect(url_for("team_detail", team_id=team_id))
  
@@ -491,7 +491,6 @@ def team_detail(team_id):
     con = get_db()
     cur = con.cursor()
  
-    # Get team info
     cur.execute("SELECT * FROM Teams WHERE TeamID = ?", (team_id,))
     team = cur.fetchone()
  
@@ -499,7 +498,6 @@ def team_detail(team_id):
         con.close()
         return redirect(url_for("teams"))
  
-    # Check user is a member
     cur.execute("SELECT * FROM TeamMembers WHERE TeamID = ? AND Username = ?",
                 (team_id, session["Username"]))
     membership = cur.fetchone()
@@ -508,13 +506,10 @@ def team_detail(team_id):
         con.close()
         return redirect(url_for("teams"))
  
-    # Get all members
-    cur.execute("""
-        SELECT tm.Username, tm.Role
-        FROM TeamMembers tm
-        WHERE tm.TeamID = ?
-        ORDER BY tm.Role DESC, tm.Username ASC
-    """, (team_id,))
+    cur.execute(""" SELECT TeamMembers.Username, TeamMembers.Role
+        FROM TeamMembers
+        WHERE TeamMembers.TeamID = ?
+        ORDER BY TeamMembers.Role DESC, TeamMembers.Username ASC """, (team_id,))
     members = cur.fetchall()
  
     con.close()
@@ -536,7 +531,6 @@ def add_member(team_id):
     con = get_db()
     cur = con.cursor()
  
-    # Only owner can add members
     cur.execute("SELECT * FROM Teams WHERE TeamID = ? AND OwnerUsername = ?",
                 (team_id, session["Username"]))
     team = cur.fetchone()
@@ -585,7 +579,6 @@ def remove_member(team_id, username):
     con = get_db()
     cur = con.cursor()
  
-    # Only owner can remove, and can't remove themselves
     cur.execute("SELECT * FROM Teams WHERE TeamID = ? AND OwnerUsername = ?",
                 (team_id, session["Username"]))
     team = cur.fetchone()
