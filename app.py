@@ -101,7 +101,13 @@ def signup():
         return render_template("signup.html", error = None)
     else:
         try:
-            encoded = request.form['Password'].encode()
+            password = request.form['Password']
+            confirmPassword = request.form['confirmPassword']
+
+            if password != confirmPassword:
+                return render_template("signup.html", error="Passwords do not match!")
+        
+            encoded = password.encode()
             hash = hashlib.sha256(encoded).hexdigest()
 
             con = sqlite3.connect("Database.db")
