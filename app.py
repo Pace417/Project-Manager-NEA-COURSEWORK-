@@ -469,16 +469,14 @@ def create_team():
     con = get_db()
     cur = con.cursor()
  
-    # Create the team
     cur.execute("INSERT INTO Teams (TeamName, OwnerUsername) VALUES (?, ?)",
                 (team_name, session["Username"]))
     team_id = cur.lastrowid
  
-    # Add owner 
     cur.execute("INSERT INTO TeamMembers (TeamID, Username, Role) VALUES (?, ?, 'owner')",
                 (team_id, session["Username"]))
  
-
+    con.commit()
     con.close()
     return redirect(url_for("team_detail", team_id=team_id))
  
@@ -542,7 +540,6 @@ def add_member(team_id):
     username_to_add = request.form.get("Username", "").strip()
     error = None
  
-    # Check user exists
     cur.execute("SELECT * FROM User WHERE Username = ?", (username_to_add,))
     user = cur.fetchone()
  
@@ -556,10 +553,9 @@ def add_member(team_id):
         except sqlite3.IntegrityError:
             error = f"'{username_to_add}' is already in this team."
  
-    # Get updated members list for re-render
     cur.execute("SELECT * FROM Teams WHERE TeamID = ?", (team_id,))
     team = cur.fetchone()
-    cur.execute("SELECT tm.Username, tm.Role FROM TeamMembers tm WHERE tm.TeamID = ?", (team_id,))
+    cur.execute("SELECT TeamMembers.Username, TeamMembers.Role FROM TeamMembers  WHERE TeamMembers.TeamID = ?", (team_id,))
     members = cur.fetchall()
     con.close()
  
